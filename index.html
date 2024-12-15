@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Conan Gray Fan Hub</title>
+    <style>
+        :root {
+            --primary: #2d3436;
+            --secondary: #636e72;
+            --accent: #ff7675;
+            --background: #f5f6fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--primary);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .bio-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .games-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .game-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .game-card h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.5rem 0;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .keyboard button {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .word-display {
+            font-size: 2rem;
+            letter-spacing: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Conan Gray Fan Hub</h1>
+        <p>Games & Info About Your Favorite Artist</p>
+    </header>
+
+    <div class="container">
+        <section class="bio-section">
+            <h2>About Conan Gray</h2>
+            <p>Conan Gray is an American singer-songwriter born on December 5, 1998. Rising to fame on YouTube, he's known for hits like "Heather" and "Maniac". His debut album "Kid Krow" was released in 2020, followed by "Superache" in 2022.</p>
+        </section>
+
+        <div class="games-section">
+            <!-- Wordle Clone -->
+            <div class="game-card" id="wordle-game">
+                <h3>Conan Wordle</h3>
+                <div id="wordle-grid"></div>
+                <div id="wordle-keyboard"></div>
+                <button onclick="startWordle()">New Game</button>
+                <p id="wordle-message"></p>
+            </div>
+
+            <!-- Hangman -->
+            <div class="game-card" id="hangman-game">
+                <h3>Conan Hangman</h3>
+                <div class="word-display" id="hangman-word"></div>
+                <div class="keyboard" id="hangman-keyboard"></div>
+                <button onclick="startHangman()">New Game</button>
+                <p id="hangman-message"></p>
+            </div>
+
+            <!-- Memory Match -->
+            <div class="game-card" id="memory-game">
+                <h3>Memory Match</h3>
+                <div id="memory-grid"></div>
+                <button onclick="startMemory()">New Game</button>
+                <p id="memory-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Conan-related word lists
+        const wordleWords = ['HEATHER', 'MANIAC', 'ARTIST', 'SINGER', 'TAYLOR', 'YOUTUBE'];
+        const hangmanWords = ['KIDKROW', 'SUPERACHE', 'ASTRONOMY', 'MEMORIES', 'CALIFORNIA'];
+        const memoryItems = ['Heather', 'Maniac', 'Kid Krow', 'Superache', 'YouTube', 'Guitar'];
+
+        // Wordle Game
+        let wordleAnswer = '';
+        let wordleGuesses = [];
+        let currentGuess = '';
+        let wordleGameOver = false;
+
+        function startWordle() {
+            wordleAnswer = wordleWords[Math.floor(Math.random() * wordleWords.length)];
+            wordleGuesses = [];
+            currentGuess = '';
+            wordleGameOver = false;
+            document.getElementById('wordle-message').textContent = '';
+            updateWordleDisplay();
+        }
+
+        function updateWordleDisplay() {
+            const grid = document.getElementById('wordle-grid');
+            grid.innerHTML = '';
+            
+            // Display current state
+            for (let i = 0; i < 6; i++) {
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.gap = '5px';
+                row.style.marginBottom = '5px';
+                
+                for (let j = 0; j < 6; j++) {
+                    const cell = document.createElement('div');
+                    cell.style.width = '40px';
+                    cell.style.height = '40px';
+                    cell.style.border = '2px solid #ccc';
+                    cell.style.display = 'flex';
+                    cell.style.alignItems = 'center';
+                    cell.style.justifyContent = 'center';
+                    
+                    if (wordleGuesses[i]) {
+                        cell.textContent = wordleGuesses[i][j] || '';
+                        if (wordleGuesses[i][j] === wordleAnswer[j]) {
+                            cell.style.backgroundColor = '#6ab04c';
+                            cell.style.color = 'white';
+                        } else if (wordleAnswer.includes(wordleGuesses[i][j])) {
+                            cell.style.backgroundColor = '#f9ca24';
+                            cell.style.color = 'white';
+                        }
+                    }
+                    
+                    row.appendChild(cell);
+                }
+                grid.appendChild(row);
+            }
+        }
+
+        // Hangman Game
+        let hangmanWord = '';
+        let guessedLetters = new Set();
+        let remainingGuesses = 6;
+
+        function startHangman() {
+            hangmanWord = hangmanWords[Math.floor(Math.random() * hangmanWords.length)];
+            guessedLetters.clear();
+            remainingGuesses = 6;
+            updateHangmanDisplay();
+            createHangmanKeyboard();
+        }
+
+        function updateHangmanDisplay() {
+            const display = document.getElementById('hangman-word');
+            display.textContent = hangmanWord
+                .split('')
+                .map(letter => guessedLetters.has(letter) ? letter : '_')
+                .join(' ');
+        }
+
+        function createHangmanKeyboard() {
+            const keyboard = document.getElementById('hangman-keyboard');
+            keyboard.innerHTML = '';
+            
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
+                const button = document.createElement('button');
+                button.textContent = letter;
+                button.onclick = () => guessLetter(letter);
+                keyboard.appendChild(button);
+            });
+        }
+
+        function guessLetter(letter) {
+            if (!guessedLetters.has(letter)) {
+                guessedLetters.add(letter);
+                if (!hangmanWord.includes(letter)) {
+                    remainingGuesses--;
+                }
+                updateHangmanDisplay();
+                
+                if (remainingGuesses <= 0) {
+                    document.getElementById('hangman-message').textContent = 'Game Over! The word was ' + hangmanWord;
+                }
+                
+                if (hangmanWord.split('').every(l => guessedLetters.has(l))) {
+                    document.getElementById('hangman-message').textContent = 'You won!';
+                }
+            }
+        }
+
+        // Memory Match Game
+        let memoryCards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        function startMemory() {
+            memoryCards = [...memoryItems, ...memoryItems]
+                .sort(() => Math.random() - 0.5)
+                .map((item, index) => ({
+                    id: index,
+                    content: item,
+                    isFlipped: false,
+                    isMatched: false
+                }));
+            
+            matchedPairs = 0;
+            flippedCards = [];
+            updateMemoryDisplay();
+        }
+
+        function updateMemoryDisplay() {
+            const grid = document.getElementById('memory-grid');
+            grid.innerHTML = '';
+            grid.style.display = 'grid';
+            grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+            grid.style.gap = '10px';
+            
+            memoryCards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.style.height = '100px';
+                cardElement.style.border = '2px solid #ccc';
+                cardElement.style.display = 'flex';
+                cardElement.style.alignItems = 'center';
+                cardElement.style.justifyContent = 'center';
+                cardElement.style.cursor = 'pointer';
+                
+                if (card.isFlipped || card.isMatched) {
+                    cardElement.textContent = card.content;
+                    if (card.isMatched) {
+                        cardElement.style.backgroundColor = '#6ab04c';
+                        cardElement.style.color = 'white';
+                    }
+                } else {
+                    cardElement.textContent = '?';
+                }
+                
+                cardElement.onclick = () => flipCard(card.id);
+                grid.appendChild(cardElement);
+            });
+        }
+
+        function flipCard(cardId) {
+            const card = memoryCards.find(c => c.id === cardId);
+            if (!card.isFlipped && !card.isMatched && flippedCards.length < 2) {
+                card.isFlipped = true;
+                flippedCards.push(card);
+                
+                if (flippedCards.length === 2) {
+                    if (flippedCards[0].content === flippedCards[1].content) {
+                        flippedCards.forEach(c => c.isMatched = true);
+                        matchedPairs++;
+                        if (matchedPairs === memoryItems.length) {
+                            document.getElementById('memory-message').textContent = 'You won!';
+                        }
+                    }
+                    
+                    setTimeout(() => {
+                        flippedCards.forEach(c => c.isFlipped = false);
+                        flippedCards = [];
+                        updateMemoryDisplay();
+                    }, 1000);
+                }
+                updateMemoryDisplay();
+            }
+        }
+
+        // Initialize all games
+        startWordle();
+        startHangman();
+        startMemory();
+    </script>
+</body>
+</html>
